@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" class="loading">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cagriustun</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.slim.js"
+      integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY="
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      html {
+        touch-action: none;
+
+        user-select: none;
+
+        -webkit-user-select: none;
+
+        -webkit-touch-action: none;
+      }
+
+      body {
+        margin: 0;
+
+        padding: 0;
+
+        touch-action: none;
+
+        user-select: none;
+
+        -webkit-user-select: none;
+
+        -webkit-touch-action: none;
+      }
+
+      #game-sec {
+        position: absolute;
+
+        top: 0;
+
+        width: 100%;
+
+        height: 100%;
+
+        overflow: hidden;
+
+        touch-action: none;
+
+        user-select: none;
+
+        -webkit-user-select: none;
+
+        -webkit-touch-action: none;
+      }
+
+      #game-sec.bringToTop {
+        position: fixed;
+
+        top: 0;
+
+        z-index: 10000;
+      }
+
+      #renderCanvas {
+        position: relative;
+
+        width: 100%;
+
+        height: 100%;
+
+        touch-action: none;
+
+        user-select: none;
+
+        -webkit-user-select: none;
+
+        -webkit-touch-action: none;
+
+        cursor: inherit;
+
+        margin-left: 0;
+
+        margin-right: 0;
+
+        margin-top: 0;
+      }
+
+      #app-loader-sec {
+        position: absolute;
+
+        top: 0;
+
+        left: 0;
+
+        width: 100%;
+
+        overflow: hidden;
+
+        height: 100%;
+
+        background-color: rgba(1, 1, 1, 1);
+
+        z-index: 5000;
+      }
+
+      #app-loader-sec.inactive {
+        display: none;
+      }
+
+      #app-loader-sec .loader-content svg {
+        position: relative;
+
+        width: 5vw;
+
+        height: 5vw;
+
+        left: 50%;
+
+        transform: translateX(-50%);
+      }
+
+      #loaderIcon {
+        width: 10vw;
+
+        display: table;
+
+        margin: auto;
+
+        border-radius: 20px;
+      }
+
+      #app-loader-sec .loader-content {
+        position: relative;
+
+        top: 50%;
+
+        transform: translateY(-50%);
+      }
+
+      @media (max-width: 1024px) and (max-aspect-ratio: 13/10) {
+        #loaderIcon {
+          width: 35vw;
+        }
+
+        #app-loader-sec .loader-content svg {
+          width: 15vw;
+
+          height: 15vw;
+        }
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="./css/bundle.css" />
+    <style type="text/css" id="notify-bootstrap">
+      .notifyjs-bootstrap-base {
+        font-weight: bold;
+        padding: 8px 15px 8px 14px;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        background-color: #fcf8e3;
+        border: 1px solid #fbeed5;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        white-space: nowrap;
+        padding-left: 25px;
+        background-repeat: no-repeat;
+        background-position: 3px 7px;
+      }
+
+      .notifyjs-bootstrap-error {
+        color: #b94a48;
+        background-color: #f2dede;
+        border-color: #eed3d7;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAtRJREFUeNqkVc1u00AQHq+dOD+0poIQfkIjalW0SEGqRMuRnHos3DjwAH0ArlyQeANOOSMeAA5VjyBxKBQhgSpVUKKQNGloFdw4cWw2jtfMOna6JOUArDTazXi/b3dm55socPqQhFka++aHBsI8GsopRJERNFlY88FCEk9Yiwf8RhgRyaHFQpPHCDmZG5oX2ui2yilkcTT1AcDsbYC1NMAyOi7zTX2Agx7A9luAl88BauiiQ/cJaZQfIpAlngDcvZZMrl8vFPK5+XktrWlx3/ehZ5r9+t6e+WVnp1pxnNIjgBe4/6dAysQc8dsmHwPcW9C0h3fW1hans1ltwJhy0GxK7XZbUlMp5Ww2eyan6+ft/f2FAqXGK4CvQk5HueFz7D6GOZtIrK+srupdx1GRBBqNBtzc2AiMr7nPplRdKhb1q6q6zjFhrklEFOUutoQ50xcX86ZlqaZpQrfbBdu2R6/G19zX6XSgh6RX5ubyHCM8nqSID6ICrGiZjGYYxojEsiw4PDwMSL5VKsC8Yf4VRYFzMzMaxwjlJSlCyAQ9l0CW44PBADzXhe7xMdi9HtTrdYjFYkDQL0cn4Xdq2/EAE+InCnvADTf2eah4Sx9vExQjkqXT6aAERICMewd/UAp/IeYANM2joxt+q5VI+ieq2i0Wg3l6DNzHwTERPgo1ko7XBXj3vdlsT2F+UuhIhYkp7u7CarkcrFOCtR3H5JiwbAIeImjT/YQKKBtGjRFCU5IUgFRe7fF4cCNVIPMYo3VKqxwjyNAXNepuopyqnld602qVsfRpEkkz+GFL1wPj6ySXBpJtWVa5xlhpcyhBNwpZHmtX8AGgfIExo0ZpzkWVTBGiXCSEaHh62/PoR0p/vHaczxXGnj4bSo+G78lELU80h1uogBwWLf5YlsPmgDEd4M236xjm+8nm4IuE/9u+/PH2JXZfbwz4zw1WbO+SQPpXfwG/BBgAhCNZiSb/pOQAAAAASUVORK5CYII=);
+      }
+
+      .notifyjs-bootstrap-success {
+        color: #468847;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAutJREFUeNq0lctPE0Ecx38zu/RFS1EryqtgJFA08YCiMZIAQQ4eRG8eDGdPJiYeTIwHTfwPiAcvXIwXLwoXPaDxkWgQ6islKlJLSQWLUraPLTv7Gme32zoF9KSTfLO7v53vZ3d/M7/fIth+IO6INt2jjoA7bjHCJoAlzCRw59YwHYjBnfMPqAKWQYKjGkfCJqAF0xwZjipQtA3MxeSG87VhOOYegVrUCy7UZM9S6TLIdAamySTclZdYhFhRHloGYg7mgZv1Zzztvgud7V1tbQ2twYA34LJmF4p5dXF1KTufnE+SxeJtuCZNsLDCQU0+RyKTF27Unw101l8e6hns3u0PBalORVVVkcaEKBJDgV3+cGM4tKKmI+ohlIGnygKX00rSBfszz/n2uXv81wd6+rt1orsZCHRdr1Imk2F2Kob3hutSxW8thsd8AXNaln9D7CTfA6O+0UgkMuwVvEFFUbbAcrkcTA8+AtOk8E6KiQiDmMFSDqZItAzEVQviRkdDdaFgPp8HSZKAEAL5Qh7Sq2lIJBJwv2scUqkUnKoZgNhcDKhKg5aH+1IkcouCAdFGAQsuWZYhOjwFHQ96oagWgRoUov1T9kRBEODAwxM2QtEUl+Wp+Ln9VRo6BcMw4ErHRYjH4/B26AlQoQQTRdHWwcd9AH57+UAXddvDD37DmrBBV34WfqiXPl61g+vr6xA9zsGeM9gOdsNXkgpEtTwVvwOklXLKm6+/p5ezwk4B+j6droBs2CsGa/gNs6RIxazl4Tc25mpTgw/apPR1LYlNRFAzgsOxkyXYLIM1V8NMwyAkJSctD1eGVKiq5wWjSPdjmeTkiKvVW4f2YPHWl3GAVq6ymcyCTgovM3FzyRiDe2TaKcEKsLpJvNHjZgPNqEtyi6mZIm4SRFyLMUsONSSdkPeFtY1n0mczoY3BHTLhwPRy9/lzcziCw9ACI+yql0VLzcGAZbYSM5CCSZg1/9oc/nn7+i8N9p/8An4JMADxhH+xHfuiKwAAAABJRU5ErkJggg==);
+      }
+
+      .notifyjs-bootstrap-info {
+        color: #3a87ad;
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QYFAhkSsdes/QAAA8dJREFUOMvVlGtMW2UYx//POaWHXg6lLaW0ypAtw1UCgbniNOLcVOLmAjHZolOYlxmTGXVZdAnRfXQm+7SoU4mXaOaiZsEpC9FkiQs6Z6bdCnNYruM6KNBw6YWewzl9z+sHImEWv+vz7XmT95f/+3/+7wP814v+efDOV3/SoX3lHAA+6ODeUFfMfjOWMADgdk+eEKz0pF7aQdMAcOKLLjrcVMVX3xdWN29/GhYP7SvnP0cWfS8caSkfHZsPE9Fgnt02JNutQ0QYHB2dDz9/pKX8QjjuO9xUxd/66HdxTeCHZ3rojQObGQBcuNjfplkD3b19Y/6MrimSaKgSMmpGU5WevmE/swa6Oy73tQHA0Rdr2Mmv/6A1n9w9suQ7097Z9lM4FlTgTDrzZTu4StXVfpiI48rVcUDM5cmEksrFnHxfpTtU/3BFQzCQF/2bYVoNbH7zmItbSoMj40JSzmMyX5qDvriA7QdrIIpA+3cdsMpu0nXI8cV0MtKXCPZev+gCEM1S2NHPvWfP/hL+7FSr3+0p5RBEyhEN5JCKYr8XnASMT0xBNyzQGQeI8fjsGD39RMPk7se2bd5ZtTyoFYXftF6y37gx7NeUtJJOTFlAHDZLDuILU3j3+H5oOrD3yWbIztugaAzgnBKJuBLpGfQrS8wO4FZgV+c1IxaLgWVU0tMLEETCos4xMzEIv9cJXQcyagIwigDGwJgOAtHAwAhisQUjy0ORGERiELgG4iakkzo4MYAxcM5hAMi1WWG1yYCJIcMUaBkVRLdGeSU2995TLWzcUAzONJ7J6FBVBYIggMzmFbvdBV44Corg8vjhzC+EJEl8U1kJtgYrhCzgc/vvTwXKSib1paRFVRVORDAJAsw5FuTaJEhWM2SHB3mOAlhkNxwuLzeJsGwqWzf5TFNdKgtY5qHp6ZFf67Y/sAVadCaVY5YACDDb3Oi4NIjLnWMw2QthCBIsVhsUTU9tvXsjeq9+X1d75/KEs4LNOfcdf/+HthMnvwxOD0wmHaXr7ZItn2wuH2SnBzbZAbPJwpPx+VQuzcm7dgRCB57a1uBzUDRL4bfnI0RE0eaXd9W89mpjqHZnUI5Hh2l2dkZZUhOqpi2qSmpOmZ64Tuu9qlz/SEXo6MEHa3wOip46F1n7633eekV8ds8Wxjn37Wl63VVa+ej5oeEZ/82ZBETJjpJ1Rbij2D3Z/1trXUvLsblCK0XfOx0SX2kMsn9dX+d+7Kf6h8o4AIykuffjT8L20LU+w4AZd5VvEPY+XpWqLV327HR7DzXuDnD8r+ovkBehJ8i+y8YAAAAASUVORK5CYII=);
+      }
+
+      .notifyjs-bootstrap-warn {
+        color: #c09853;
+        background-color: #fcf8e3;
+        border-color: #fbeed5;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAMAAAC6V+0/AAABJlBMVEXr6eb/2oD/wi7/xjr/0mP/ykf/tQD/vBj/3o7/uQ//vyL/twebhgD/4pzX1K3z8e349vK6tHCilCWbiQymn0jGworr6dXQza3HxcKkn1vWvV/5uRfk4dXZ1bD18+/52YebiAmyr5S9mhCzrWq5t6ufjRH54aLs0oS+qD751XqPhAybhwXsujG3sm+Zk0PTwG6Shg+PhhObhwOPgQL4zV2nlyrf27uLfgCPhRHu7OmLgAafkyiWkD3l49ibiAfTs0C+lgCniwD4sgDJxqOilzDWowWFfAH08uebig6qpFHBvH/aw26FfQTQzsvy8OyEfz20r3jAvaKbhgG9q0nc2LbZxXanoUu/u5WSggCtp1anpJKdmFz/zlX/1nGJiYmuq5Dx7+sAAADoPUZSAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfdBgUBGhh4aah5AAAAlklEQVQY02NgoBIIE8EUcwn1FkIXM1Tj5dDUQhPU502Mi7XXQxGz5uVIjGOJUUUW81HnYEyMi2HVcUOICQZzMMYmxrEyMylJwgUt5BljWRLjmJm4pI1hYp5SQLGYxDgmLnZOVxuooClIDKgXKMbN5ggV1ACLJcaBxNgcoiGCBiZwdWxOETBDrTyEFey0jYJ4eHjMGWgEAIpRFRCUt08qAAAAAElFTkSuQmCC);
+      }
+    </style>
+    <style type="text/css" id="core-notify">
+      .notifyjs-corner {
+        position: fixed;
+        margin: 5px;
+        z-index: 1050;
+      }
+
+      .notifyjs-corner .notifyjs-wrapper,
+      .notifyjs-corner .notifyjs-container {
+        position: relative;
+        display: block;
+        height: inherit;
+        width: inherit;
+        margin: 3px;
+      }
+
+      .notifyjs-wrapper {
+        z-index: 1;
+        position: absolute;
+        display: inline-block;
+        height: 0;
+        width: 0;
+      }
+
+      .notifyjs-container {
+        display: none;
+        z-index: 1;
+        position: absolute;
+      }
+
+      .notifyjs-hidable {
+        cursor: pointer;
+      }
+
+      [data-notify-text],
+      [data-notify-html] {
+        position: relative;
+      }
+
+      .notifyjs-arrow {
+        position: absolute;
+        z-index: 2;
+        width: 0;
+        height: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="css/demo.css" />
+    <link rel="stylesheet" href="css/PanoControls.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <!-- <div id="loading"></div> -->
+    <div class="panoviewer-container viewer">
+      <div id="panoSet">
+        <div class="panoviewer container" id="myPanoViewer">
+          <div class="viewer" data-page="1">
+            <div class="container"></div>
+            <div
+              class="hotspot search search1"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="50"
+              data-pitch="0"
+              onclick="cu_remove(1)"
+            >
+              <img id="search_img" src="img/santa/Santa01.png" />
+            </div>
+            <div
+              class="hotspot search search2"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-30"
+              data-pitch="20"
+              onclick="cu_remove(2)"
+            >
+              <img id="search_img" src="img/santa/Santa02.png" />
+            </div>
+            <div
+              class="hotspot search search3"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="140"
+              data-pitch="70"
+              onclick="cu_remove(3)"
+            >
+              <img id="search_img" src="img/santa/Santa03.png" />
+            </div>
+            <div
+              class="hotspot search search4"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-90"
+              data-pitch="-40"
+              onclick="cu_remove(4)"
+            >
+              <img id="search_img" src="img/santa/Santa04.png" />
+            </div>
+            <div
+              class="hotspot search search5"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="0"
+              data-pitch="110"
+              onclick="cu_remove(5)"
+            >
+              <img id="search_img" src="img/santa/Santa05.png" />
+            </div>
+            <div
+              class="hotspot search search6"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-70"
+              data-pitch="-10"
+              onclick="cu_remove(6)"
+            >
+              <img id="search_img" src="img/santa/Santa06.png" />
+            </div>
+            <div
+              class="hotspot search search7"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-76"
+              data-pitch="-83"
+              onclick="cu_remove(7)"
+            >
+              <img id="search_img" src="img/santa/Santa07.png" />
+            </div>
+            <div
+              class="hotspot search search8"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-130"
+              data-pitch="50"
+              onclick="cu_remove(8)"
+            >
+              <img id="search_img" src="img/santa/Santa14.png" />
+            </div>
+            <div
+              class="hotspot search search9"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-162"
+              data-pitch="-30"
+              onclick="cu_remove(9)"
+            >
+              <img id="search_img" src="img/santa/Santa11.png" />
+            </div>
+            <div
+              class="hotspot search search10"
+              data-page="1"
+              data-anchor-index="0"
+              data-yaw="-120"
+              data-pitch="10"
+              onclick="cu_remove(10)"
+            >
+              <img id="search_img" src="img/santa/Santa15.png" />
+            </div>
+          </div>
+
+          <div class="scoreboard" style="display: none;">
+            <span class="scoreboard_txt">0</span>
+          </div>
+          <div id="game-sec">
+            <div class="timer-sec">
+              <img src="assets/game/Game-Timer.png" alt="" />
+              <div class="timer" id="timer">30</div>
+            </div>
+            <div class="found-sec">
+              <img src="assets/game/Game-Found.png" alt="" />
+              <div class="count-cnt" id="foundCnt">0</div>
+            </div>
+            <canvas
+              id="renderCanvas"
+              width="804"
+              height="937"
+              touch-action="none"
+              style="touch-action: none;"
+            ></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="share-screen">
+      <div class="confetti-sec">
+        <div class="flake1"><img src="assets/title/flake1.png" alt="" /></div>
+        <div class="flake2"><img src="assets/title/flake1.png" alt="" /></div>
+        <div class="flake3"><img src="assets/title/flake2.png" alt="" /></div>
+        <div class="flake4"><img src="assets/title/flake3.png" alt="" /></div>
+      </div>
+      <!-- <div class="brand-logo"><img src="assets/title/brand-logo.png" alt=""></div> -->
+      <!-- <div class="share-logo"><img src="assets/title/title-logo.png?v=1" alt=""></div> -->
+      <div class="share-desc"></div>
+      <div
+        class="share-desc_2"
+        style="margin-top: 15px; margin-bottom: 15px;"
+      ></div>
+      <div class="register_div">
+        <div class="mb-3">
+          <input
+            type="email"
+            class="form_control_2"
+            id="register_name"
+            placeholder="Name"
+          />
+        </div>
+        <div class="mb-3">
+          <input
+            type="email"
+            class="form_control_2"
+            id="register_surname"
+            placeholder="Surname"
+          />
+        </div>
+        <div class="mb-3">
+          <input
+            type="email"
+            class="form_control_2"
+            id="register_mail"
+            placeholder="name@example.com"
+          />
+        </div>
+        <div class="mb-3">
+          <input
+            type="email"
+            class="form_control_2"
+            id="register_phone"
+            placeholder="905**********"
+          />
+        </div>
+      </div>
+      <div id="share-btn"><img src="assets/share/FbShare.png" alt="" /></div>
+      <div class="share-footer-sec">
+        <div class="footer-santas">
+          <img src="assets/title/Santas.png" alt="" />
+        </div>
+        <a href="index.html">
+          <div id="replay">
+            PLAY AGAIN
+            <div class="btn-cover"></div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div id="instruction-screen">
+      <div class="instruction-sec">
+        <div class="instruction-head">HOW TO PLAY</div>
+        <div class="instruction-content">
+          <div class="inst" id="inst1">
+            <img src="assets/instruction/img1.png" alt="" />
+          </div>
+          <div class="inst" id="inst2">
+            <img src="assets/instruction/img2.png" alt="" />
+          </div>
+          <div class="inst" id="inst3">
+            <img src="assets/instruction/img3.png" alt="" />
+          </div>
+        </div>
+        <div class="inst-counter">5</div>
+      </div>
+    </div>
+    <div id="title-screen">
+      <div class="confetti-sec">
+        <div class="flake1"><img src="assets/title/flake1.png" alt="" /></div>
+        <div class="flake2"><img src="assets/title/flake1.png" alt="" /></div>
+        <div class="flake3"><img src="assets/title/flake2.png" alt="" /></div>
+        <div class="flake4"><img src="assets/title/flake3.png" alt="" /></div>
+      </div>
+      <!-- <div class="brand-logo"><img src="assets/title/brand-logo.png" alt=""></div> -->
+      <div class="title-logo">
+        <img src="assets/title/title-logo.png?v=1" alt="" />
+      </div>
+      <div class="title-footer-sec">
+        <div class="footer-santas">
+          <img src="assets/title/Santas.png" alt="" />
+        </div>
+        <div id="playNow">
+          PLAY NOW
+          <div class="btn-cover"></div>
+        </div>
+      </div>
+    </div>
+    <div id="myModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+              &times;
+            </button>
+            <h4 class="modal-title">Register For the Gifts</h4>
+          </div>
+          <div class="modal-body">
+            Your registration has been received, thank you!
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://naver.github.io/egjs-view360/common/js/jquery-2.2.4.js"></script>
+    <script src="https://naver.github.io/egjs-view360/common/js/qrcode.js"></script>
+    <script src="https://naver.github.io/egjs-view360/common/js/screenfull.min.js"></script>
+    <script src="https://naver.github.io/egjs-view360/common/js/PieView.js"></script>
+    <script src="https://naver.github.io/egjs-view360/common/js/GyroTouchOptions.js"></script>
+    <script src="https://naver.github.io/egjs-view360/release/latest/dist/view360.pkgd.js"></script>
+    <script src="https://naver.github.io/egjs-view360/common/js/PanoControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.7.2/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@2.0.1/build/webxr-polyfill.min.js"></script>
+    <script src="https://naver.github.io/egjs-view360/common/js/initXR.js"></script>
+    <script src="script.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js'
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: 'AIzaSyAYPFMItlG9G3iLzuwVyFHScO5ZrwdLSyc',
+        authDomain: 'aliasgar2-7b805.firebaseapp.com',
+        projectId: 'aliasgar2-7b805',
+        storageBucket: 'aliasgar2-7b805.appspot.com',
+        messagingSenderId: '1017230672040',
+        appId: '1:1017230672040:web:083732b2bfbd092fdbc29d',
+      }
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig)
+
+      var r_n, r_s, r_m, r_p
+      function Ready() {
+        r_n = document.querySelector('#register_name').value
+        r_s = document.querySelector('#register_surname').value
+        r_m = document.querySelector('#register_mail').value
+        r_p = document.querySelector('#register_phone').value
+      }
+      document.getElementById('register_button').onclick = function () {
+        Ready()
+        firebase
+          .database()
+          .ref('customer/' + r_m)
+          .set({
+            CustomerName: r_n,
+            CustomerSurname: r_s,
+            CustomerMail: r_m,
+            CustomerPhoneNumber: r_p,
+          })
+      }
+    </script>
+
+    <script>
+      var cu_score_txt = 0
+      document.getElementById('playNow').onclick = function () {
+        document.querySelector('#title-screen').style.display = 'none'
+        document.querySelector('.panoviewer-container').style.display = 'none'
+        document.querySelector('#game-sec').style.display = 'none'
+        document.querySelector('#share-screen').style.display = 'none'
+        if (localStorage.getItem('cu_score_1') == null) {
+          localStorage.setItem('cu_score_1', 0)
+        }
+        var timeleft = 4
+        var downloadTimer = setInterval(function () {
+          if (timeleft <= 0) {
+            clearInterval(downloadTimer)
+            document.querySelector('#instruction-screen').style.display = 'none'
+            document.querySelector('#share-screen').style.display = 'none'
+            document.querySelector('.panoviewer-container').style.display =
+              'block'
+            document.querySelector('#game-sec').style.display = 'block'
+            startGame()
+          }
+          document.querySelector('.inst-counter').textContent = timeleft
+          timeleft -= 1
+        }, 1000)
+      }
+      function cu_remove(p) {
+        cu_full = '.search' + p
+        cu_score_txt = parseInt(document.querySelector('#foundCnt').textContent)
+        cu_score_txt++
+        document.querySelector('#foundCnt').textContent = cu_score_txt
+        var target = $(cu_full)
+        removeElement(target)
+      }
+
+      function removeElement(target) {
+        target.animate(
+          {
+            opacity: '-=1',
+          },
+          600,
+          function () {
+            target.remove()
+          },
+        )
+      }
+      function startGame() {
+        var cu_timeleft = 30
+        var cu_downloadTimer = setInterval(function () {
+          if (cu_timeleft <= 0) {
+            clearInterval(cu_downloadTimer)
+            if (localStorage.getItem('cu_score_1') < cu_score_txt) {
+              localStorage.setItem('cu_score_1', cu_score_txt)
+            }
+            document.querySelector('.panoviewer-container').style.display =
+              'none'
+            document.querySelector('#game-sec').style.display = 'none'
+            document.querySelector('#share-screen').style.display = 'block'
+            document.querySelector('.share-desc').textContent =
+              'Congrats! Your Score: ' + cu_score_txt
+            document.querySelector('.share-desc_2').textContent =
+              'Your High Score: ' + localStorage.getItem('cu_score_1')
+          }
+          document.querySelector('#timer').textContent = cu_timeleft
+          cu_timeleft -= 1
+        }, 1000)
+      }
+      function hideLoader() {
+        $('#loading').hide()
+      }
+
+      $(window).load(hideLoader)
+      setTimeout(hideLoader, 20 * 1000)
+
+      $('#share-btn').click(function () {
+        r_n = document.querySelector('#register_name').value
+        r_s = document.querySelector('#register_surname').value
+        r_m = document.querySelector('#register_mail').value
+        r_p = document.querySelector('#register_phone').value
+        if (r_n == '' || r_s == '' || r_m == '' || r_p == '') {
+          alert('Please fill in the blanks!')
+        } else {
+          $('#myModal').modal('show');
+          setTimeout(function(){   
+          window.location="index.html";
+          }, 3000);
+          
+        }
+      })
+    </script>
+  </body>
+</html>
