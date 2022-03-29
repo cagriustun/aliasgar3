@@ -513,48 +513,53 @@
     <script src="https://naver.github.io/egjs-view360/common/js/initXR.js"></script>
     <script src="script.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+    <!-- <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> -->
 
     <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js'
+     // Import the functions you need from the SDKs you need
+     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
       // TODO: Add SDKs for Firebase products that you want to use
       // https://firebase.google.com/docs/web/setup#available-libraries
-
+    
       // Your web app's Firebase configuration
       const firebaseConfig = {
-        apiKey: 'AIzaSyAYPFMItlG9G3iLzuwVyFHScO5ZrwdLSyc',
-        authDomain: 'aliasgar2-7b805.firebaseapp.com',
-        projectId: 'aliasgar2-7b805',
-        storageBucket: 'aliasgar2-7b805.appspot.com',
-        messagingSenderId: '1017230672040',
-        appId: '1:1017230672040:web:083732b2bfbd092fdbc29d',
-      }
+        apiKey: "AIzaSyAYPFMItlG9G3iLzuwVyFHScO5ZrwdLSyc",
+        authDomain: "aliasgar2-7b805.firebaseapp.com",
+        databaseURL: "https://aliasgar2-7b805-default-rtdb.firebaseio.com",
+        projectId: "aliasgar2-7b805",
+        storageBucket: "aliasgar2-7b805.appspot.com",
+        messagingSenderId: "1017230672040",
+        appId: "1:1017230672040:web:083732b2bfbd092fdbc29d"
+      };
 
       // Initialize Firebase
-      const app = initializeApp(firebaseConfig)
-
-      var r_n, r_s, r_m, r_p
-      function Ready() {
-        r_n = document.querySelector('#register_name').value
-        r_s = document.querySelector('#register_surname').value
-        r_m = document.querySelector('#register_mail').value
-        r_p = document.querySelector('#register_phone').value
-      }
-      document.getElementById('register_button').onclick = function () {
-        Ready()
-        firebase
-          .database()
-          .ref('customer/' + r_m)
-          .set({
-            CustomerName: r_n,
-            CustomerSurname: r_s,
-            CustomerMail: r_m,
-            CustomerPhoneNumber: r_p,
+      const app = initializeApp(firebaseConfig);
+      import { getDatabase, ref, set, child, update, remove} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+  
+      const db = getDatabase();
+  
+      var r_n= document.getElementById("register_name");
+      var r_s= document.getElementById("register_surname");
+      var r_m= document.getElementById("register_mail");
+      var r_p= document.getElementById("register_phone");
+      function insertData(){
+          set(ref(db,"customer/"+ r_p.value),{
+            CustomerName: r_n.value,
+            CustomerSurname: r_s.value,
+            CustomerMail: r_m.value,
+            CustomerPhoneNumber: r_p.value,
+            CustomerFound: cu_score_txt
+          })
+          .then(()=>{
+              alert("Data eklendi");
+          })
+          .catch((error)=>{
+              alert("Eklenmedi "+error);
           })
       }
+      document.getElementById("share-btn").addEventListener('click', insertData);
     </script>
 
     <script>
@@ -607,6 +612,7 @@
         var cu_downloadTimer = setInterval(function () {
           if (cu_timeleft <= 0) {
             clearInterval(cu_downloadTimer)
+            
             if (localStorage.getItem('cu_score_1') < cu_score_txt) {
               localStorage.setItem('cu_score_1', cu_score_txt)
             }
