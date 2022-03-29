@@ -553,10 +553,10 @@
             CustomerFound: cu_score_txt
           })
           .then(()=>{
-              alert("Data eklendi");
+              console.log("data added");
           })
           .catch((error)=>{
-              alert("Eklenmedi "+error);
+              console.log(error);
           })
       }
       document.getElementById("share-btn").addEventListener('click', insertData);
